@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.urls import is_valid_path
 from .forms import SignUpForm, AddRecordForm
 from .models import Record
 
@@ -89,3 +90,16 @@ def add_record(request):
 	else:
 		messages.success(request, "You Must Be Logged In...")
 		return redirect('home')
+     
+def update_record(request, pk):
+    if request.user.is_authenticated:
+        current_record = Record.objects.get(id=pk)
+        form = AddRecordForm(request.POST or None, instance=current_record)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Record has been updated")
+            return redirect('home')
+        return render(request, 'update_record.html', {'form':form})
+    else:
+        messages.success(request, "You Must Be Logged In...")
+        return redirect('home')
